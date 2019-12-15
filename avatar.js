@@ -56,3 +56,14 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
+document.addEventListener('keydown', sendKeyDown);
+function sendKeyDown(event) {
+  var code = event.code;
+  if (code === 'ArrowLeft') { avatar.position.x -= 5; }
+  if (code === 'ArrowRight') { avatar.position.x += 5; }
+  if (code === 'ArrowUp') { avatar.position.z -= 5; }
+  if (code === 'ArrowDown') { avatar.position.z += 5; }
+  if (code === 'KeyC') {  isCartwheeling = !isCartwheeling; }
+  if (code === 'KeyF') {  isFlipping = !isFlipping; }
+}
