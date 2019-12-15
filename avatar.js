@@ -8,7 +8,6 @@ scene.add(light);
 var aspectRatio = window.innerWidth / window.innerHeight;
 var camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 10000);
 camera.position.z = 500;
-scene.add(camera);
 
 // The "renderer" draws what the camera sees onto the screen:
 var renderer = new THREE.WebGLRenderer({antialias: true});
@@ -38,6 +37,7 @@ avatar.add(rightHand);
 avatar.add(leftHand);
 avatar.add(rightFoot);
 avatar.add(leftFoot);
+avatar.add(camera);
 
 function makeTreeAt(x, z) {
   var trunk = new THREE.Mesh(
