@@ -34,10 +34,25 @@ leftFoot.position.set(75, -125, 0);
 
 
 scene.add(avatar);
-scene.add(rightHand);
-scene.add(leftHand);
-scene.add(rightFoot);
-scene.add(leftFoot);
+avatar.add(rightHand);
+avatar.add(leftHand);
+avatar.add(rightFoot);
+avatar.add(leftFoot);
 
 // Now, show what the camera sees on the screen:
-renderer.render(scene, camera);
+
+var isCartwheeling = false;
+var isFlipping = false;
+function animate() {
+  requestAnimationFrame(animate);
+  if (isCartwheeling) {
+    avatar.rotation.z = avatar.rotation.z + 0.05;
+  }
+
+  if (isFlipping) {
+    avatar.rotation.x = avatar.rotation.x + 0.05;
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
