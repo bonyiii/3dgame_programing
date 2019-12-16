@@ -16,6 +16,9 @@ document.body.appendChild(renderer.domElement);
 
 // ******** START CODING ON THE NEXT LINE ********
 
+var marker = new THREE.Object3D();
+scene.add(marker);
+
 var body = new THREE.SphereGeometry(100);
 var cover = new THREE.MeshNormalMaterial();
 var avatar = new THREE.Mesh(body, cover);
@@ -30,14 +33,12 @@ rightFoot.position.set(-75, -125, 0);
 var leftFoot = new THREE.Mesh(hand, cover);
 leftFoot.position.set(75, -125, 0);
 
-
-
-scene.add(avatar);
+marker.add(avatar);
 avatar.add(rightHand);
 avatar.add(leftHand);
 avatar.add(rightFoot);
 avatar.add(leftFoot);
-avatar.add(camera);
+marker.add(camera);
 
 function makeTreeAt(x, z) {
   var trunk = new THREE.Mesh(
@@ -84,10 +85,10 @@ animate();
 document.addEventListener('keydown', sendKeyDown);
 function sendKeyDown(event) {
   var code = event.code;
-  if (code === 'ArrowLeft') { avatar.position.x -= 5; }
-  if (code === 'ArrowRight') { avatar.position.x += 5; }
-  if (code === 'ArrowUp') { avatar.position.z -= 5; }
-  if (code === 'ArrowDown') { avatar.position.z += 5; }
+  if (code === 'ArrowLeft') { marker.position.x -= 5; }
+  if (code === 'ArrowRight') { marker.position.x += 5; }
+  if (code === 'ArrowUp') { marker.position.z -= 5; }
+  if (code === 'ArrowDown') { marker.position.z += 5; }
   if (code === 'KeyC') {  isCartwheeling = !isCartwheeling; }
   if (code === 'KeyF') {  isFlipping = !isFlipping; }
 }
