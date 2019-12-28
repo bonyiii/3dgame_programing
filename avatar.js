@@ -66,10 +66,23 @@ makeTreeAt(-750, -1000);
 
 // Now, show what the camera sees on the screen:
 
+var clock = new THREE.Clock();
 var isCartwheeling = false;
 var isFlipping = false;
+var isMovingRight = false;
+var isMovingLeft = false;
+var isMovingForward = false;
+var isMovingBack = false;
+
 function animate() {
   requestAnimationFrame(animate);
+  walk();
+  acrobatics();
+  renderer.render(scene, camera);
+}
+animate();
+
+function acrobatics() {
   if (isCartwheeling) {
     avatar.rotation.z = avatar.rotation.z + 0.05;
   }
@@ -77,18 +90,59 @@ function animate() {
   if (isFlipping) {
     avatar.rotation.x = avatar.rotation.x + 0.05;
   }
-
-  renderer.render(scene, camera);
 }
-animate();
+
+function isWalking() {
+  if (isMovingRight) { return true; }
+  if (isMovingLeft) { return true; }
+  if (isMovingForward) { return true; }
+  if (isMovingBack) { return true; }
+  return false;
+}
+
+function walk() {
+  if (!isWalking()) { return; }
+
+  var speed = 10;
+  var size = 100;
+  var time = clock.getElapsedTime();
+  var position = Math.sin(speed * time) * size;
+  rightHand.position.z = position;
+  leftHand.position.z = -position;
+  rightFoot.position.z = -position;
+  leftFoot.position.z = position;
+}
 
 document.addEventListener('keydown', sendKeyDown);
 function sendKeyDown(event) {
   var code = event.code;
-  if (code === 'ArrowLeft') { marker.position.x -= 5; }
-  if (code === 'ArrowRight') { marker.position.x += 5; }
-  if (code === 'ArrowUp') { marker.position.z -= 5; }
-  if (code === 'ArrowDown') { marker.position.z += 5; }
-  if (code === 'KeyC') {  isCartwheeling = !isCartwheeling; }
-  if (code === 'KeyF') {  isFlipping = !isFlipping; }
+  if (code === 'ArrowLeft') {
+    marker.position.x -= 5;
+    isMovingLeft = true;
+  }
+  if (code === 'ArrowRight') {
+    marker.position.x += 5;
+    isMovingRight = true;
+  }
+  if (code === 'ArrowUp') {
+    marker.position.z -= 5;
+    isMovingForward = true;
+  }
+  if (code === 'ArrowDown') {
+    marker.position.z += 5;
+    isMovingBack = true;
+  }
+  if (code === 'KeyC') {  isCartwheeling = true; }
+  if (code === 'KeyF') {  isFlipping = true; }
+}
+
+document.addEventListener('keyup', sendKeyUp);
+function sendKeyUp(event) {
+  var code = event.code;
+  if (code === 'ArrowLeft') { isMovingLeft = false; }
+  if (code === 'ArrowRight') { isMovingRight = false; }
+  if (code === 'ArrowUp') { isMovingForward = false; }
+  if (code === 'ArrowDown') { isMovingBack = false; }
+  if (code === 'KeyC') {  isCartwheeling = false }
+  if (code === 'KeyF') {  isFlipping = false }
 }
