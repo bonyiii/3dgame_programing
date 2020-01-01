@@ -73,9 +73,12 @@ var isMovingRight = false;
 var isMovingLeft = false;
 var isMovingForward = false;
 var isMovingBack = false;
+var direction;
+var lastDirection;
 
 function animate() {
   requestAnimationFrame(animate);
+  turn();
   walk();
   acrobatics();
   renderer.render(scene, camera);
@@ -111,6 +114,15 @@ function walk() {
   leftHand.position.z = -position;
   rightFoot.position.z = -position;
   leftFoot.position.z = position;
+}
+
+function turn() {
+  if(isMovingRight) { direction = Math.PI / 2; }
+  if(isMovingLeft) { direction = - Math.PI / 2; }
+  if(isMovingForward) { direction = Math.PI; }
+  if(isMovingBack) { direction = 0; }
+  if(!isWalking) { directio = 0; }
+  avatar.rotation.y = direction;
 }
 
 document.addEventListener('keydown', sendKeyDown);
