@@ -78,6 +78,7 @@ var lastDirection;
 
 function animate() {
   requestAnimationFrame(animate);
+  TWEEN.update();
   turn();
   walk();
   acrobatics();
@@ -121,8 +122,14 @@ function turn() {
   if(isMovingLeft) { direction = - Math.PI / 2; }
   if(isMovingForward) { direction = Math.PI; }
   if(isMovingBack) { direction = 0; }
-  if(!isWalking) { directio = 0; }
-  avatar.rotation.y = direction;
+  if(!isWalking()) { direction = 0; }
+
+  if(direction == lastDirection) { return; }
+  lastDirection = direction;
+
+  var tween = new TWEEN.Tween(avatar.rotation);
+  tween.to({y: direction}, 500);
+  tween.start();
 }
 
 document.addEventListener('keydown', sendKeyDown);
