@@ -7,6 +7,11 @@ scene.add(light);
 // The "camera" is what sees the stuff:
 var aspectRatio = window.innerWidth / window.innerHeight;
 var camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 10000);
+
+//var width = window.innerWidth;
+//var height = window.innerHeight;
+//var camera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 1, 10000);
+
 camera.position.z = 500;
 
 // The "renderer" draws what the camera sees onto the screen:
