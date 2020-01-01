@@ -8,10 +8,6 @@ scene.add(light);
 var aspectRatio = window.innerWidth / window.innerHeight;
 var camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 10000);
 
-//var width = window.innerWidth;
-//var height = window.innerHeight;
-//var camera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 1, 10000);
-
 camera.position.z = 500;
 
 // The "renderer" draws what the camera sees onto the screen:
@@ -45,6 +41,9 @@ avatar.add(rightFoot);
 avatar.add(leftFoot);
 marker.add(camera);
 
+var notAllowed = [];
+
+
 function makeTreeAt(x, z) {
   var trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(50, 50, 200),
@@ -56,14 +55,25 @@ function makeTreeAt(x, z) {
     new THREE.MeshBasicMaterial({ color: 'forestgreen' })
   );
 
+  var boundary = new THREE.Mesh(
+    new THREE.CircleGeometry(300),
+    new THREE.MeshNormalMaterial()
+  )
+
+  boundary.position.y = -100;
+  boundary.rotation.x = -Math.PI / 2;
+  trunk.add(boundary);
+  notAllowed.push(boundary);
+
   top.position.y = 175;
   trunk.add(top);
+
 
   trunk.position.set(x, -75, z);
   scene.add(trunk);
 }
 
-makeTreeAt(0, 0);
+makeTreeAt(0, -550);
 makeTreeAt(500, 0);
 makeTreeAt(-500, 0);
 makeTreeAt(750, -1000);
@@ -137,6 +147,16 @@ function turn() {
   tween.start();
 }
 
+function isColliding() {
+  var vector = new THREE.Vector3(0, -1, 0);
+  var raycaster = new THREE.Raycaster(marker.position, vector);
+
+  var intersects = raycaster.intersectObjects(notAllowed);
+  if (intersects.length > 0) { return true; }
+
+  return false;
+}
+
 document.addEventListener('keydown', sendKeyDown);
 function sendKeyDown(event) {
   var code = event.code;
@@ -158,6 +178,14 @@ function sendKeyDown(event) {
   }
   if (code === 'KeyC') {  isCartwheeling = true; }
   if (code === 'KeyF') {  isFlipping = true; }
+
+  if(isColliding()) {
+    if(isMovingLeft) { marker.position.x = marker.position.x + 5;}
+    if(isMovingRight) { marker.position.x = marker.position.x - 5;}
+    if(isMovingForward) { marker.position.z = marker.position.z + 5;}
+    if(isMovingBack) { marker.position.z = marker.position.z - 5;}
+
+  }
 }
 
 document.addEventListener('keyup', sendKeyUp);
