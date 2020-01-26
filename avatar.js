@@ -42,7 +42,7 @@ avatar.add(leftFoot);
 marker.add(camera);
 
 var notAllowed = [];
-
+var treeTops = [];
 
 function makeTreeAt(x, z) {
   var trunk = new THREE.Mesh(
@@ -56,7 +56,7 @@ function makeTreeAt(x, z) {
   );
 
   var boundary = new THREE.Mesh(
-    new THREE.CircleGeometry(300),
+    new THREE.CircleGeometry(200),
     new THREE.MeshNormalMaterial()
   )
 
@@ -64,20 +64,50 @@ function makeTreeAt(x, z) {
   boundary.rotation.x = -Math.PI / 2;
   trunk.add(boundary);
   notAllowed.push(boundary);
+  treeTops.push(top);
 
   top.position.y = 175;
   trunk.add(top);
-
 
   trunk.position.set(x, -75, z);
   scene.add(trunk);
 }
 
-makeTreeAt(0, -550);
 makeTreeAt(500, 0);
 makeTreeAt(-500, 0);
 makeTreeAt(750, -1000);
 makeTreeAt(-750, -1000);
+
+var treasureTreeNumber;
+var shakingTreeTween;
+function updateTreasureTreeNumber() {
+  var rand = Math.random() * treeTops.length;
+  treasureTreeNumber = Math.floor(rand);
+}
+
+function shakeTreasureTree() {
+  updateTreasureTreeNumber();
+
+  var tween = new TWEEN.Tween({ shake: 0 });
+  tween.to({ shake: 20 * 2 * Math.PI }, 8 * 1000);
+  tween.onUpdate(shakeTreeUpdate);
+  tween.onComplete(shakeTreeComplete);
+  shakingTreeTween = tween;
+  tween.start();
+}
+
+function shakeTreeUpdate(update) {
+  var top = treeTops[treasureTreeNumber];
+  top.position.x = 50 * Math.sin(update.shake);
+}
+
+function shakeTreeComplete() {
+  var top = treeTops[treasureTreeNumber];
+  top.position.x = 0;
+  setTimeout(shakeTreasureTree, 2 * 1000);
+}
+
+shakeTreasureTree();
 
 // Now, show what the camera sees on the screen:
 
@@ -90,6 +120,21 @@ var isMovingForward = false;
 var isMovingBack = false;
 var direction;
 var lastDirection;
+var fruit;
+
+var scoreboard = new Scoreboard();
+scoreboard.countdown(45);
+scoreboard.score();
+scoreboard.help(
+  'Arrow keys to move. ' +
+  'Space bar to jump for fruit. ' +
+  'Watch for shaking trees wih fruit. ' +
+  'Get near the tree and jump before the fruit is gone'
+);
+scoreboard.onTimeExpired(timeExpired);
+function timeExpired() {
+  scoreboard.message("Game Over!");
+}
 
 function animate() {
   requestAnimationFrame(animate);
@@ -157,34 +202,104 @@ function isColliding() {
   return false;
 }
 
+function jump() {
+  if(avatar.position.y > 0) { return; }
+  checkForTreasure();
+  animateJump();
+}
+
+function checkForTreasure() {
+  var top = treeTops[treasureTreeNumber];
+  var tree = top.parent;
+  var p1 = tree.position;
+  var p2 = marker.position;
+  var xDiff = p1.x - p2.x;
+  var zDiff = p1.z - p2.z;
+
+  var distance = Math.sqrt(Math.pow(xDiff,2) + Math.pow(zDiff,2));
+  if (distance < 500) { scorePoints(); }
+}
+
+function scorePoints() {
+  if (scoreboard.getTimeRemaining() === 0) { return; }
+  scoreboard.addPoints(10);
+  //Sounds.bubble.play();
+  shakingTreeTween.stop();
+  shakeTreeComplete();
+  animateFruit();
+}
+
+function animateJump() {
+  var tween = new TWEEN.Tween({ jump: 0 });
+  tween.to({ jump: Math.PI }, 400);
+  tween.onUpdate(animateJumpUpdate);
+  tween.onComplete(animateJumpComplete);
+  tween.start();
+}
+
+function animateJumpUpdate(update) {
+  avatar.position.y = 100 * Math.sin(update.jump);
+}
+
+function animateJumpComplete() {
+  avatar.position.y = 0;
+}
+
+function animateFruit() {
+  if (fruit) { return; }
+
+  fruit = new THREE.Mesh(
+    new THREE.CylinderGeometry(25,25,5,25),
+    new THREE.MeshBasicMaterial({ color: 'gold' })
+  );
+  marker.add(fruit);
+
+  var tween = new TWEEN.Tween({ height: 200, spin: 0 });
+  tween.to({ height: 350, spin: 2 * Math.PI}, 50);
+  tween.onUpdate(animateFruitUpdate);
+  tween.onComplete(animateFruitComplete);
+  tween.start();
+}
+
+function animateFruitUpdate(update) {
+  fruit.position.y = update.height;
+  fruit.position.x = update.spin;
+}
+
+function animateFruitComplete() {
+  marker.remove(fruit);
+  fruit = undefined;
+}
+
 document.addEventListener('keydown', sendKeyDown);
 function sendKeyDown(event) {
   var code = event.code;
   if (code === 'ArrowLeft') {
-    marker.position.x -= 5;
+    marker.position.x -= 8;
     isMovingLeft = true;
   }
   if (code === 'ArrowRight') {
-    marker.position.x += 5;
+    marker.position.x += 8;
     isMovingRight = true;
   }
   if (code === 'ArrowUp') {
-    marker.position.z -= 5;
+    marker.position.z -= 8;
     isMovingForward = true;
   }
   if (code === 'ArrowDown') {
-    marker.position.z += 5;
+    marker.position.z += 8;
     isMovingBack = true;
   }
   if (code === 'KeyC') {  isCartwheeling = true; }
   if (code === 'KeyF') {  isFlipping = true; }
+
+  if (code === 'Space') { jump() }
 
   if(isColliding()) {
     if(isMovingLeft) { marker.position.x = marker.position.x + 5;}
     if(isMovingRight) { marker.position.x = marker.position.x - 5;}
     if(isMovingForward) { marker.position.z = marker.position.z + 5;}
     if(isMovingBack) { marker.position.z = marker.position.z - 5;}
-
   }
 }
 
